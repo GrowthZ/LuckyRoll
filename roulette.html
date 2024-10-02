@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Lucky Roll</title>
+    
+    <!-- Bootstrap 5.3.0 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- jQuery 3.6.0 -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+    <!-- Bootstrap 5.3.0 JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div id="main-roulette">
+        <img id="main-gift" class="main-bg" src="Images/bg-new.png" alt="Main Gift Background">
+        
+        <div class="roulette_container" id="roulette-main"></div>
+        
+        <div class="customer">
+            <div class="name">
+                <span>Khách hàng: </span><span id="c-name">Lucky Member</span>
+            </div>
+            <div class="orderId">
+                <span>Số may mắn: </span><span id="c-orderId">Order ID of Member</span>
+            </div>
+        </div>
+
+        <div class="btn_container">
+            <input type="image" class="start" src="Images/start.png" alt="Start"/>
+            <input type="image" class="stop" src="Images/stop.png" alt="Stop"/>
+        </div>
+        
+        <button class="home-btn btn btn-info btn-lg">
+            <i class="glyphicon glyphicon-home"></i> Home
+        </button>
+    </div>
+    <script>
+        // let customers = [];
+    </script>
+
+    <!-- Custom JS -->
+    <script src="js/demo2.js"></script>
+    <script src="js/roulette2.js"></script>
+    <script src="js/js.js"></script>
+    <!-- <script type="module" src="js/loadData.js"></script> -->
+
+    <script>
+        // Thông tin API và Google Sheet
+        const apiKey = 'AIzaSyBucWJu7aR881en4-yz3ZkDklNeayFBdsA'; // Thay bằng API Key của bạn
+        const sheetId = '1Hsek5hgCpe2EHgvIjOdSvz4OQxRTPwF_Gs1czib9GUk'; // Thay bằng Sheet ID của bạn
+        const range = 'Data!A2:B'; // Phạm vi dữ liệu cần lấy
+        
+        // Hàm gọi API Google Sheets
+        function fetchSheetData() {
+            const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${range}?key=${apiKey}`;
+            fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                const rows = data.values;
+                if (rows.length) {
+                    rows.forEach((row, index) => {
+                        customers.push({
+                            orderid: row[0],     // Cột A là orderid
+                            customername: row[1] // Cột B là customername
+                        });
+                    });
+                    $('.start').removeAttr('disabled');
+
+                } else {
+                    console.log('No data found.');
+                }
+            })
+            .catch(error => console.error('Error fetching data:', error));
+        }
+
+        // Khởi tạo giao diện quay
+        function initRoulette() {
+            let arr = "0123456789ABCDEFGHIKLMNOPQRSTUVWXYZ";
+            arr = arr.split('');
+            let content = "";
+            for (let i = 0; i < arr.length; i++) {
+                content += `<img data-value="${arr[i]}" src="Images/TEXT/${arr[i]}.png" alt="${arr[i]}"/>`;
+            }
+            let roulette = document.getElementById("roulette-main");
+            let pattern = `<div class="roulette">${content}</div>`;
+            roulette.innerHTML = "";
+            for (let i = 0; i < 10; i++) {
+                roulette.innerHTML += pattern;
+            }
+        }
+
+        function parseURLParams(url) {
+            let queryStart = url.indexOf("?") + 1,
+                queryEnd = url.indexOf("#") + 1 || url.length + 1,
+                query = url.slice(queryStart, queryEnd - 1),
+                pairs = query.replace(/\+/g, " ").split("&"),
+                parms = {}, i, n, v, nv;
+
+            if (query === url || query === "") return;
+
+            for (i = 0; i < pairs.length; i++) {
+                nv = pairs[i].split("=", 2);
+                n = decodeURIComponent(nv[0]);
+                v = decodeURIComponent(nv[1]);
+
+                if (!parms.hasOwnProperty(n)) parms[n] = [];
+                parms[n].push(nv.length === 2 ? v : null);
+            }
+            return parms;
+        }
+
+        function setupScreen() {
+            let params = parseURLParams(window.location.href);
+            if (params && params["type"]) {
+                let id = params["type"][0];
+                switch (id) {
+                    case "gold":
+                        document.getElementById("main-gift").src = "Images/bg-gold.jpg";
+                        break;
+                    case "diamond":
+                        document.getElementById("main-gift").src = "Images/tivi.png";
+                        break;
+                    default:
+                        document.getElementById("main-gift").src = "Images/bg-new.png";
+                        break;
+                }
+            }
+        }
+
+        // Gọi các hàm khi trang được tải
+        document.addEventListener("DOMContentLoaded", function () {
+            setupScreen();
+            initRoulette();
+            fetchSheetData(); // Lấy dữ liệu từ Google Sheets
+        });
+    </script>
+</body>
+</html>
